@@ -1,0 +1,15 @@
+.git
+#.gitignore
+.dockerignore
+#.agents
+#.codex
+.vscode
+node_modules
+#dist
+#coverage
+.env
+.env.*
+*.log
+*.md
+#docker-compose.yml
+#kubernetes.yaml

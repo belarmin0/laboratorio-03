@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-miguel-alarcon
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-miguel-alarcon
+  namespace: ns-miguel-alarcon
+data:
+  AMBIENTE: "PROD-LAB03"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-miguel-alarcon
+  namespace: ns-miguel-alarcon
+type: Opaque
+stringData:
+  API_KEY: "super-secreto"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-miguel-alarcon
+  namespace: ns-miguel-alarcon
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-miguel-alarcon
+  template:
+    metadata:
+      labels:
+        app: app-miguel-alarcon
+    spec:
+      containers:
+      - name: webapp
+        image: tu-usuario-dockerhub/tarea-final:miguel-alarcon #
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: AMBIENTE
+          valueFrom:
+            configMapRef:
+              name: config-miguel-alarcon
+              key: AMBIENTE
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: secret-miguel-alarcon
+              key: API_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-miguel-alarcon
+  namespace: ns-miguel-alarcon
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: app-miguel-alarcon

@@ -1,0 +1,71 @@
+pipeline {
+    agent {
+        kubernetes {
+            yamfile 'agent.yaml'
+        }
+    }
+    environment {
+        REGISTRY_USER = 'miguelbelarmino'
+        IMAGE_NAME = 'laboratorio03'
+        APP_VERSION = '3.0'
+        IMAGE_TAG = "miguel-alarcon"
+        DH_REPO = 'miguelbelarmino/laboratorio03'
+        GH_REPO = 'ghcr.io/miguelbelarmino/laboratorio03'
+    }
+    stages{
+        stage('Install'){
+            container('node') {
+                steps{
+                    echo 'Instalado dependencias...'
+                    sh 'npm ci'
+                }
+            }
+
+        }
+        stage('Test'){
+            container('node'){
+                steps{
+                    echo 'Ejecutando pruebas...'
+                    sh 'npm test -- --coverage'
+                }
+            }
+
+        }
+        stage('Build'){
+            container('docker') {
+                steps{
+                    echo 'Construyendo imagen ...'
+                    sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$IMAGE_TAG .'
+                    sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$APP_VERSION .'
+                }
+            }
+
+        }
+        stage('Push'){
+            container('docker') {
+                steps{
+                    echo 'Subiendo imagen a repositorio...'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                        sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
+                        sh 'docker push $REGISTRY_USER/$IMAGE_NAME:$IMAGE_TAG'
+                    }
+                }
+            }
+        }
+        stage('Deploy'){
+            container('kubectl') {
+                steps{
+                    echo 'Desplegando...'
+                    sh 'kubectl apply -f entrega.yaml'
+                    echo 'Verificando despliegue...'
+                    sh 'kubectl rollout status deployment/app-miguel-alarcon -n ns-miguel-alarcon'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline finalizado.'
+        }
+    }
+}
