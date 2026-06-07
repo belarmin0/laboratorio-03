@@ -13,23 +13,23 @@ pipeline {
         GH_REPO = 'ghcr.io/miguelbelarmino/laboratorio03'
     }
     stages{
-        stage('Install'){
-            steps{
+        stage('Install') {
+            steps {
                 container('pnpm'){
                     echo 'Instalado dependencias...'
                     sh 'npm ci'
                 }
             }
         }
-        stage('Test'){
-            steps{
+        stage('Test') {
+            steps {
                 container('node') {
                     echo 'Ejecutando pruebas...'
                     sh 'npm test -- --coverage'
             }
         }
-        stage('Build'){
-            steps{
+        stage('Build') {
+            steps {
                 container('buildkit') {
                     echo 'Construyendo imagen ...'
                     sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$IMAGE_TAG .'
@@ -37,8 +37,8 @@ pipeline {
                 }
             }
         }
-        stage('Push'){
-            steps{
+        stage('Push') {
+            steps {
                 container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
@@ -48,8 +48,8 @@ pipeline {
                 }
             }
         }
-        stage('Deploy'){
-            steps{
+        stage('Deploy') {
+            steps {
                container('kubectl') {
                     echo 'Desplegando...'
                     sh 'kubectl apply -f entrega.yaml'
