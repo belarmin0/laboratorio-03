@@ -5,15 +5,15 @@ metadata:
     agente-jenkins: jenkins-agent-miguel-alarcon
 spec:
   containers:
-  - name: jnlp
-    image: jenkins/inbound-agent:latest
-    resources:
-      limits:
-        memory: "256Mi"
-        cpu: "500m"
-      requests:
-        memory: "64Mi"
-        cpu: "50m"
+#  - name: jnlp
+#    image: jenkins/inbound-agent:latest
+#    resources:
+#      limits:
+#        memory: "256Mi"
+#        cpu: "500m"
+#      requests:
+#        memory: "64Mi"
+#        cpu: "50m"
   - name: node
     image: node:24-alpine
     command: ["cat"]
