@@ -25,6 +25,17 @@ spec:
       requests:
         memory: "128Mi"
         cpu: "100m"
+  - name: pnpm
+    image: ghcr.io/pnpm/pnpm:latest
+    command: ["cat"]
+    tty: true
+    resources:
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+      requests:
+        memory: "16Mi"
+        cpu: "50m"
   - name: docker
     image: docker:latest
     command: ["cat"]
