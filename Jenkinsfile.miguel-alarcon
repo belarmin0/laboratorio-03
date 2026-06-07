@@ -5,7 +5,8 @@ pipeline {
         }
     }
     environment {
-        REGISTRY_USER = 'miguelbelarmino'
+        DH_REGISTRY_USER = 'miguelbelarmino'
+        GH_REGISTRY_USER = 'belarmin0'
         IMAGE_NAME = 'laboratorio-03'
         APP_VERSION = '3.0'
         IMAGE_TAG = "miguel-alarcon"
@@ -42,10 +43,12 @@ pipeline {
             steps {
                 container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-                        sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-                        sh 'docker push $REGISTRY_USER/$IMAGE_NAME:$IMAGE_TAG'
-                    }
+                    sh '''
+                        export DOCKER_CONFIG=/docker-configs/dockerhub
+                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "DockerHub config not found" && exit 1)
+                        export DOCKER_CONFIG=/docker-configs/github
+                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "GitHub config not found" && exit 1)
+                    '''
                 }
             }
         }
