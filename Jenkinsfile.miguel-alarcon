@@ -6,44 +6,40 @@ pipeline {
     }
     environment {
         REGISTRY_USER = 'miguelbelarmino'
-        IMAGE_NAME = 'laboratorio03'
+        IMAGE_NAME = 'laboratorio-03'
         APP_VERSION = '3.0'
         IMAGE_TAG = "miguel-alarcon"
-        DH_REPO = 'miguelbelarmino/laboratorio03'
+        DH_REPO = 'miguelbelarmino/laboratorio-03'
         GH_REPO = 'ghcr.io/miguelbelarmino/laboratorio03'
     }
     stages{
         stage('Install'){
-            container('node') {
-                steps{
+            steps{
+                container('pnpm'){
                     echo 'Instalado dependencias...'
                     sh 'npm ci'
                 }
             }
-
         }
         stage('Test'){
-            container('node'){
-                steps{
+            steps{
+                container('node') {
                     echo 'Ejecutando pruebas...'
                     sh 'npm test -- --coverage'
-                }
             }
-
         }
         stage('Build'){
-            container('docker') {
-                steps{
+            steps{
+                container('buildkit') {
                     echo 'Construyendo imagen ...'
                     sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$IMAGE_TAG .'
                     sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$APP_VERSION .'
                 }
             }
-
         }
         stage('Push'){
-            container('docker') {
-                steps{
+            steps{
+                container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
@@ -53,8 +49,8 @@ pipeline {
             }
         }
         stage('Deploy'){
-            container('kubectl') {
-                steps{
+            steps{
+               container('kubectl') {
                     echo 'Desplegando...'
                     sh 'kubectl apply -f entrega.yaml'
                     echo 'Verificando despliegue...'
