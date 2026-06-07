@@ -26,6 +26,7 @@ pipeline {
                 container('node') {
                     echo 'Ejecutando pruebas...'
                     sh 'npm test -- --coverage'
+                }
             }
         }
         stage('Build') {
