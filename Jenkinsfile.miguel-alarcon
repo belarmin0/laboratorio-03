@@ -29,7 +29,7 @@ pipeline {
                 container('node-pnpm') {
                     echo 'Ejecutando pruebas...'
                     sh 'pnpm lint'
-                    sh 'pnpm test -- --coverage'
+                    sh 'pnpm test --coverage'
                 }
             }
         }
@@ -56,8 +56,7 @@ pipeline {
                     sh '''
                     pgrep buildkitd || (buildkitd --allow-insecure-entitlement security.insecure & sleep 5)
                     export DOCKER_CONFIG=/docker-configs/dockerhub
-                    buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. \\
-                                   --output type=image,\\"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG},docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}\\",push=true
+                    buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --output type=image,\\"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG},docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}\\",push=true
                     '''
                 }
             }
