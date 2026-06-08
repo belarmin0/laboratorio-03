@@ -97,13 +97,13 @@ spec:
       path: /var/run/docker.sock
   - name: regcred-dh-miguel-alarcon
     secret:
-      secretName: regcred-dh-miguel-alarcon
+      secretName: secret-dh-miguel-alarcon
       items:
       - key: .dockerconfigjson
         path: config.json
   - name: regcred-gh-miguel-alarcon
     secret:
-      secretName: regcred-gh-miguel-alarcon
+      secretName: secret-gh-miguel-alarcon
       items:
       - key: .dockerconfigjson
         path: config.json
