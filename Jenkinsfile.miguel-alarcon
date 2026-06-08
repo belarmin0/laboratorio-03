@@ -54,23 +54,24 @@ pipeline {
                 container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
                     sh '''
+                    # 1. Definir la ruta del secreto montado por Kubernetes
+                    export DOCKER_CONFIG=/docker-configs/dockerhub
+                    
+                    # 2. Iniciar demonio pasando la configuración del secreto montado
+                    # BuildKit heredará la variable DOCKER_CONFIG de este entorno
                     pgrep buildkitd || (buildkitd --addr unix:///run/buildkit/buildkitd.sock --allow-insecure-entitlement security.insecure &)
                     
-                    # Damos un tiempo de gracia para que el socket se cree físicamente en disco
-                    for i in {1..10}; do
-                        if [ -S /run/buildkit/buildkitd.sock ]; then break; fi
-                        echo "Esperando por buildkitd.sock..."
-                        sleep 1
-                    done
-
-                    export DOCKER_CONFIG=/docker-configs/dockerhub
-
+                    # 3. Esperar al socket
+                    for i in {1..10}; do [ -S /run/buildkit/buildkitd.sock ] && break || sleep 1; done
+                    
+                    # 4. Construir y empujar
+                    # Al tener DOCKER_CONFIG=/docker-configs/dockerhub, buildctl leerá el config.json del secret
                     buildctl --addr unix:///run/buildkit/buildkitd.sock build \
                         --frontend=dockerfile.v0 \
                         --local context=. \
                         --local dockerfile=. \
-                        --output type=image,"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG}",push=true \
-                        --output type=image,"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}",push=true
+                        --output type=image,"name=docker.io/miguelbelarmino/laboratorio-03:${IMAGE_TAG}",push=true \
+                        --output type=image,"name=docker.io/miguelbelarmino/laboratorio-03:${APP_VERSION}",push=true
 
                     '''
                 }
