@@ -54,8 +54,11 @@ pipeline {
                 container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
                     sh '''
-                    pgrep buildkitd || (buildkitd --allow-insecure-entitlement security.insecure & sleep 5)
+                    pkill buildkitd || true
+                    sleep 2
                     export DOCKER_CONFIG=/docker-configs/dockerhub
+                    pgrep buildkitd || (buildkitd --allow-insecure-entitlement security.insecure & sleep 5)
+
                     buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --output type=image,\\"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG},docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}\\",push=true
                     '''
                 }
