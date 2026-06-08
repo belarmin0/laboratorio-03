@@ -5,52 +5,6 @@ metadata:
     agente-jenkins: jenkins-agent-miguel-alarcon
 spec:
   containers:
-#  - name: jnlp
-#    image: jenkins/inbound-agent:latest
-#    resources:
-#      limits:
-#        memory: "256Mi"
-#        cpu: "500m"
-#      requests:
-#        memory: "64Mi"
-#        cpu: "50m"
-#  - name: node
-#    image: node:24-alpine
-#    command: ["cat"]
-#    tty: true
-#    resources:
-#      limits:
-#        memory: "512Mi"
-#        cpu: "500m"
-#      requests:
-#        memory: "128Mi"
-#        cpu: "100m"
-#  - name: pnpm
-#    image: ghcr.io/pnpm/pnpm:latest
-#    command: ["cat"]
-#    tty: true
-#    resources:
-#      limits:
-#        memory: "512Mi"
-#        cpu: "500m"
-#      requests:
-#        memory: "16Mi"
-#        cpu: "50m"
-#  - name: docker
-#    image: docker:latest
-#    command: ["cat"]
-#    tty: true
-#    resources:
-#      limits:
-#        memory: "512Mi"
-#        cpu: "500m"
-#      requests:
-#        memory: "128Mi"
-#        cpu: "100m"
-#    volumeMounts:
-#    - name: app-source
-#      mountPath: /var/run/docker.sock
-#      name: docker-socket
   - name: node-pnpm
     image: node:24-alpine
     command: ["cat"]
@@ -91,24 +45,24 @@ spec:
     - name: regcred-gh-miguel-alarcon
       mountPath: /docker-configs/github
       readOnly: true
-  - name: docker-cli
-    image: docker:24.0-cli
-    command: ["cat"]
-    tty: true
-    resources:
-      limits:
-        memory: "512Mi"
-        cpu: "500m"
-      requests:
-        memory: "32Mi"
-        cpu: "50m"
-    volumeMounts:
-    - name: docker-socket
-      mountPath: /var/run/docker.sock
+ # - name: docker-cli
+ #   image: docker:24.0-cli
+ #   command: ["cat"]
+ #   tty: true
+ #   resources:
+ #     limits:
+ #       memory: "512Mi"
+ #       cpu: "500m"
+ #     requests:
+ #       memory: "32Mi"
+ #       cpu: "50m"
+ #   volumeMounts:
+ #   - name: docker-socket
+ #     mountPath: /var/run/docker.sock
   volumes:
-  - name: docker-socket
-    hostPath:
-      path: /var/run/docker.sock
+ # - name: docker-socket
+ #   hostPath:
+#      path: /var/run/docker.sock
   - name: regcred-dh-miguel-alarcon
     secret:
       secretName: secret-dh-miguel-alarcon

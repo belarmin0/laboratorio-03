@@ -12,6 +12,7 @@ pipeline {
         IMAGE_TAG = "miguel-alarcon"
         DH_REPO = 'miguelbelarmino/laboratorio-03'
         GH_REPO = 'ghcr.io/miguelbelarmino/laboratorio03'
+        LAB_NAMESPACE = 'ns-miguel-alarcon'
     }
     stages{
         stage('Install') {
@@ -33,34 +34,30 @@ pipeline {
         }
         stage('Build') {
             steps {
-                container('docker-cli') {
+                container('buildkit') {
                     echo 'Construyendo imagen ...'
-                    sh "docker build -t ${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker build -t ${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION} ."
-                    sh "docker build -t ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker build -t ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION} ."
+                //    sh "docker build -t ${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                //    sh "docker build -t ${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION} ."
+                //    sh "docker build -t ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                //    sh "docker build -t ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION} ."
+                sh '''
+                buildkitd --allow-insecure-entitlement security.insecure &
+                sleep 5
+                buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=.
+                '''
                 }
             }
         }
         stage('Push') {
             steps {
-                container('docker-cli') {
+                container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
-//                    sh '''
-//                        export DOCKER_CONFIG=/docker-configs/dockerhub
-//                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "DockerHub config not found" && exit 1)
-//                        export DOCKER_CONFIG=/docker-configs/github
-//                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "GitHub config not found" && exit 1)
-//                    '''
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
-                        sh "docker push ${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                        sh "docker push ${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}"
-                    }
-                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')]) {
-                        sh "echo \$GH_PASS | docker login ghcr.io -u \$GH_USER --password-stdin"
-                        sh "docker push ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    }
+                    sh '''
+                    pgrep buildkitd || (buildkitd --allow-insecure-entitlement security.insecure & sleep 5)
+                    export DOCKER_CONFIG=/docker-configs/dockerhub
+                    buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. \\
+                                   --output type=image,\\"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG},docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}\\",push=true
+                    '''
                 }
             }
         }
@@ -69,7 +66,6 @@ pipeline {
                container('kubectl') {
                     echo 'Desplegando...'
                     sh 'kubectl apply -f entrega.yaml'
-                    echo 'Verificando despliegue...'
                     sh 'kubectl rollout status deployment/app-miguel-alarcon -n ns-miguel-alarcon'
                 }
             }
