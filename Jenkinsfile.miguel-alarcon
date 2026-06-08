@@ -16,7 +16,7 @@ pipeline {
     stages{
         stage('Install') {
             steps {
-                container('pnpm'){
+                container('node-pnpm'){
                     echo 'Instalado dependencias...'
                     sh 'npm ci'
                 }
