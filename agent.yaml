@@ -14,7 +14,44 @@ spec:
 #      requests:
 #        memory: "64Mi"
 #        cpu: "50m"
-  - name: node
+#  - name: node
+#    image: node:24-alpine
+#    command: ["cat"]
+#    tty: true
+#    resources:
+#      limits:
+#        memory: "512Mi"
+#        cpu: "500m"
+#      requests:
+#        memory: "128Mi"
+#        cpu: "100m"
+#  - name: pnpm
+#    image: ghcr.io/pnpm/pnpm:latest
+#    command: ["cat"]
+#    tty: true
+#    resources:
+#      limits:
+#        memory: "512Mi"
+#        cpu: "500m"
+#      requests:
+#        memory: "16Mi"
+#        cpu: "50m"
+#  - name: docker
+#    image: docker:latest
+#    command: ["cat"]
+#    tty: true
+#    resources:
+#      limits:
+#        memory: "512Mi"
+#        cpu: "500m"
+#      requests:
+#        memory: "128Mi"
+#        cpu: "100m"
+#    volumeMounts:
+#    - name: app-source
+#      mountPath: /var/run/docker.sock
+#      name: docker-socket
+  - name: node-pnpm
     image: node:24-alpine
     command: ["cat"]
     tty: true
@@ -23,34 +60,8 @@ spec:
         memory: "512Mi"
         cpu: "500m"
       requests:
-        memory: "128Mi"
-        cpu: "100m"
-  - name: pnpm
-    image: ghcr.io/pnpm/pnpm:latest
-    command: ["cat"]
-    tty: true
-    resources:
-      limits:
-        memory: "512Mi"
-        cpu: "500m"
-      requests:
-        memory: "16Mi"
+        memory: "32Mi"
         cpu: "50m"
-  - name: docker
-    image: docker:latest
-    command: ["cat"]
-    tty: true
-    resources:
-      limits:
-        memory: "512Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "100m"
-    volumeMounts:
-    - name: app-source
-      mountPath: /var/run/docker.sock
-      name: docker-socket
   - name: kubectl
     image: bitnami/kubectl:latest
     command: ["cat"]
@@ -60,8 +71,8 @@ spec:
         memory: "512Mi"
         cpu: "500m"
       requests:
-        memory: "128Mi"
-        cpu: "100m"
+        memory: "32Mi"
+        cpu: "50m"
   - name: buildkit
     image: moby/buildkit:latest
     command: ["cat"]
