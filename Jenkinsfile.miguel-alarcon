@@ -54,24 +54,19 @@ pipeline {
                 container('buildkit') {
                     echo 'Subiendo imagen a repositorio...'
                     sh '''
-                    # 1. Definir la ruta del secreto montado por Kubernetes
-                    export DOCKER_CONFIG=/docker-configs/dockerhub
-                    
-                    # 2. Iniciar demonio pasando la configuración del secreto montado
-                    # BuildKit heredará la variable DOCKER_CONFIG de este entorno
+# 1. Iniciar demonio asegurando el socket
                     pgrep buildkitd || (buildkitd --addr unix:///run/buildkit/buildkitd.sock --allow-insecure-entitlement security.insecure &)
-                    
-                    # 3. Esperar al socket
                     for i in {1..10}; do [ -S /run/buildkit/buildkitd.sock ] && break || sleep 1; done
-                    
-                    # 4. Construir y empujar
-                    # Al tener DOCKER_CONFIG=/docker-configs/dockerhub, buildctl leerá el config.json del secret
+
+                    # 2. Ejecutar push usando el flag --registry.config
+                    # Esto le dice a buildctl exactamente dónde leer el config.json del secreto
                     buildctl --addr unix:///run/buildkit/buildkitd.sock build \
                         --frontend=dockerfile.v0 \
                         --local context=. \
                         --local dockerfile=. \
+                        --registry.config /docker-configs/dockerhub/config.json \
                         --output type=image,"name=docker.io/miguelbelarmino/laboratorio-03:${IMAGE_TAG}",push=true \
-                        --output type=image,"name=docker.io/miguelbelarmino/laboratorio-03:${APP_VERSION}",push=true
+                        --output type=image,"name=docker.io/miguelbelarmino/laboratorio-03:3.0",push=true 
 
                     '''
                 }
