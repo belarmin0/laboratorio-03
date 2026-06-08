@@ -28,7 +28,8 @@ pipeline {
             steps {
                 container('node-pnpm') {
                     echo 'Ejecutando pruebas...'
-                    sh 'npm test -- --coverage'
+                    sh 'pnpm lint'
+                    sh 'pnpm test -- --coverage'
                 }
             }
         }
