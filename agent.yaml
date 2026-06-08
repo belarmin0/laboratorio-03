@@ -47,24 +47,7 @@ spec:
       readOnly: true
     securityContext:
       privileged: true
- # - name: docker-cli
- #   image: docker:24.0-cli
- #   command: ["cat"]
- #   tty: true
- #   resources:
- #     limits:
- #       memory: "512Mi"
- #       cpu: "500m"
- #     requests:
- #       memory: "32Mi"
- #       cpu: "50m"
- #   volumeMounts:
- #   - name: docker-socket
- #     mountPath: /var/run/docker.sock
   volumes:
- # - name: docker-socket
- #   hostPath:
-#      path: /var/run/docker.sock
   - name: regcred-dh-miguel-alarcon
     secret:
       secretName: secret-dh-miguel-alarcon

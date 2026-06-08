@@ -44,7 +44,7 @@ spec:
         env:
         - name: AMBIENTE
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: config-miguel-alarcon
               key: AMBIENTE
         - name: API_KEY
