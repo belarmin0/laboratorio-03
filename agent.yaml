@@ -33,7 +33,7 @@ spec:
     tty: true
     resources:
       limits:
-        memory: "512Mi"
+        memory: "1024Mi"
         cpu: "500m"
       requests:
         memory: "32Mi"
@@ -45,6 +45,8 @@ spec:
     - name: regcred-gh-miguel-alarcon
       mountPath: /docker-configs/github
       readOnly: true
+    securityContext:
+      privileged: true
  # - name: docker-cli
  #   image: docker:24.0-cli
  #   command: ["cat"]
