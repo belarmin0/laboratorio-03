@@ -62,11 +62,10 @@ pipeline {
                         echo "Esperando por buildkitd.sock..."
                         sleep 1
                     done
-                    
-                    export DOCKER_CONFIG=/docker-configs/dockerhub
-                    pgrep buildkitd || (buildkitd --allow-insecure-entitlement security.insecure & sleep 5)
 
-                    buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --output type=image,\\"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG},docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}\\",push=true
+                    export DOCKER_CONFIG=/docker-configs/dockerhub
+
+                    buildctl --addr unix:///run/buildkit/buildkitd.sock build  --frontend=dockerfile.v0 --local context=. --local dockerfile=. --output type=image,"name=docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG},docker.io/${DH_REGISTRY_USER}/${IMAGE_NAME}:3.0",push=true
                     '''
                 }
             }
