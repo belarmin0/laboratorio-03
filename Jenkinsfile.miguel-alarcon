@@ -18,13 +18,14 @@ pipeline {
             steps {
                 container('node-pnpm'){
                     echo 'Instalado dependencias...'
-                    sh 'npm ci'
+                    sh 'corepack enable'
+                    sh 'pnpm install --frozen-lockfile'
                 }
             }
         }
         stage('Test') {
             steps {
-                container('node') {
+                container('node-pnpm') {
                     echo 'Ejecutando pruebas...'
                     sh 'npm test -- --coverage'
                 }
@@ -32,23 +33,34 @@ pipeline {
         }
         stage('Build') {
             steps {
-                container('buildkit') {
+                container('docker-cli') {
                     echo 'Construyendo imagen ...'
-                    sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$IMAGE_TAG .'
-                    sh 'docker build -t $REGISTRY_USER/$IMAGE_NAME:$APP_VERSION .'
+                    sh "docker build -t ${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker build -t ${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION} ."
+                    sh "docker build -t ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker build -t ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION} ."
                 }
             }
         }
         stage('Push') {
             steps {
-                container('buildkit') {
+                container('docker-cli') {
                     echo 'Subiendo imagen a repositorio...'
-                    sh '''
-                        export DOCKER_CONFIG=/docker-configs/dockerhub
-                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "DockerHub config not found" && exit 1)
-                        export DOCKER_CONFIG=/docker-configs/github
-                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "GitHub config not found" && exit 1)
-                    '''
+//                    sh '''
+//                        export DOCKER_CONFIG=/docker-configs/dockerhub
+//                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "DockerHub config not found" && exit 1)
+//                        export DOCKER_CONFIG=/docker-configs/github
+//                        test -s "$(DOCKER_CONFIG)/config.json" || (echo "GitHub config not found" && exit 1)
+//                    '''
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                        sh "docker push ${DH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${DH_REGISTRY_USER}/${IMAGE_NAME}:${APP_VERSION}"
+                    }
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')]) {
+                        sh "echo \$GH_PASS | docker login ghcr.io -u \$GH_USER --password-stdin"
+                        sh "docker push ghcr.io/${GH_REGISTRY_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    }
                 }
             }
         }

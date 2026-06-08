@@ -7,7 +7,7 @@ RUN pnpm install --frozen-lockfile
 FROM dependencias AS construccion
 COPY nest-cli.json tsconfig*.json ./
 COPY src ./src
-RUN npm run build
+RUN pnpm run build
 
 FROM node:24-alpine AS dependencias-produccion
 WORKDIR /usr/app
