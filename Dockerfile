@@ -12,7 +12,7 @@ RUN pnpm run build
 FROM node:24-alpine AS dependencias-produccion
 WORKDIR /usr/app
 RUN corepack enable
-COPY package.json pnpm-lock.yaml pnpm.workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 FROM node:24-alpine AS produccion
